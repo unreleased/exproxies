@@ -1,0 +1,26 @@
+{
+  "name": "exproxies-1",
+  "version": "1.0.0",
+  "description": "A basic NodeJS squid server proxy manager for CentOS 7",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unreleased/exproxies.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/unreleased/exproxies/issues"
+  },
+  "homepage": "https://github.com/unreleased/exproxies#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "inquirer": "^7.3.3",
+    "knex": "^0.21.12",
+    "mysql": "^2.18.1"
+  }
+}
