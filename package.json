@@ -18,9 +18,13 @@
   },
   "homepage": "https://github.com/unreleased/exproxies#readme",
   "dependencies": {
+    "apache-md5": "^1.1.5",
+    "crypto": "^1.0.1",
     "dotenv": "^8.2.0",
     "inquirer": "^7.3.3",
     "knex": "^0.21.12",
-    "mysql": "^2.18.1"
+    "moment": "^2.29.1",
+    "mysql": "^2.18.1",
+    "pass": "^0.2.0"
   }
 }
