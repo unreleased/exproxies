@@ -28,6 +28,6 @@ inquirer
 
 const addProxy = async () => {
 	// Get passwd files
-	const passwd = fs.readFileSync("/etc/squid/passwd")
+	const passwd = fs.readFileSync("/etc/squid/passwd", "utf8")
 	console.log(passwd)
 }
