@@ -13,8 +13,8 @@ auth_param basic children 500
 auth_param basic credentialsttl 20 seconds
 #acl users src "/etc/squid/squid_users"
 
-acl bando src 86.0.165.91
-http_access allow bando
+# acl bando src 86.0.165.91
+# http_access allow bando
 
 
 acl ncsa_users proxy_auth REQUIRED
