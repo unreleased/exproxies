@@ -55,8 +55,6 @@ app.post("/api/proxies", async (req, res) => {
 	 * Change the passwords for proxies inside the request.
 	 */
 
-	console.log(req.body)
-
 	for (const ip of req.body) {
 		const proxy = await knex("proxies").where("ip", ip).first()
 
