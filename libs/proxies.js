@@ -1,7 +1,6 @@
 const fs = require("fs")
 const knex = require("./database")
 const moment = require("moment")
-const Helper = require("./helper")
 const Shell = require("shelljs")
 
 const Proxies = {}

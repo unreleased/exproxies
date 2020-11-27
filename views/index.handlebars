@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proxy management</title>
+
+  <style>
+    body, html {
+      font-family: 'Arial', 'sans-serif';
+      margin: 60px;
+    }
+
+    table {
+      border-collapse: collapse;
+    }
+
+    td, th {
+      padding: 10px 10px;
+    }
+
+    form {
+      margin-bottom: 30px;
+    }
+
+    input[type=text] {
+      padding: 12.5px 15px;
+      width: 300px;
+    }
+
+    .expired {
+      color: red;
+    }
+
+  </style>
+</head>
+<body>
+  <h1>Proxies</h1>
+
+  <form>
+    <input type="text" name="search" id="search" placeholder="Search for proxies" />
+  </form>
+
+  <table id="proxies" border="1"></table>
+
+  <script>
+    // Search function
+    const search = document.getElementById("search")
+    search.addEventListener('keyup', () => {
+      loadProxies(search.value)
+    })
+
+    // For rendering the proxy data to the frontend
+    const reset = (ip) => {
+      fetch(`/api/proxies`, {
+        method: 'POST',
+        body: JSON.stringify([ ip ]),
+        headers: {
+          'content-type': 'application/json'
+        }
+      }).then(res => {
+        console.log(search.value)
+        loadProxies(search.value)
+      })
+    }
+
+    const loadProxies = (query = false) => {
+      let path = '/api/proxies'
+      if (query) {
+        path += `/${query}`
+      }
+      
+      fetch(path).then(res => res.json()).then(proxies => {
+        const table = document.getElementById("proxies")
+        
+        table.innerHTML = `<tr>
+          <th><input type="checkbox" name="proxy" /></th>
+          <th>Proxy</th>
+          <th>Last updated</th>
+          <th>Actions</th>
+        </tr>`
+
+        for (const proxy of proxies) {
+          console.log(`Expired? ${proxy.expired}`)
+          table.innerHTML += `<tr>
+              <td><input type="checkbox" name="proxy" /></td>
+              <td>${proxy.ip}:${proxy.port}:${proxy.user}:${proxy.pass}</td>
+              <td class="${proxy.expired ? 'expired' : ''}">${proxy.updated_at}</td>
+              <td><button class="reset" onclick="reset('${proxy.ip}')">Reset</button></td>
+            </tr>`
+        }
+      })
+    }
+
+    window.onload = () => {
+      loadProxies()
+    }
+  </script>
+
+</body>
+</html>
