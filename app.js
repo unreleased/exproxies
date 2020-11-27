@@ -44,6 +44,7 @@ const addProxy = async () => {
 		.then(({ host }) => {
 			const user = makeid(5)
 			const pass = makeid(5)
+			const proxy = `${host}:3128:${user}:${pass}`
 
 			// Format for squid.conf
 			const formattedConf = [
@@ -68,6 +69,8 @@ const addProxy = async () => {
 			// squid -k reconfigure
 
 			shell.exec("squid -k reconfigure")
+
+			console.log(`Proxy ready: ${proxy}`)
 
 			// console.log(formattedConf)
 			// console.log(formattedPasswd)
