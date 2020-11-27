@@ -3,6 +3,7 @@ const inquirer = require("inquirer")
 const fs = require("fs")
 const md5 = require("apache-md5")
 const moment = require("moment")
+const shell = require("shelljs")
 
 inquirer
 	.prompt({
@@ -38,7 +39,7 @@ const addProxy = async () => {
 		.prompt({
 			type: "input",
 			name: "host",
-			message: "What is the proxy username?",
+			message: "What is the proxy host?",
 		})
 		.then(({ host }) => {
 			const user = makeid(5)
@@ -63,6 +64,10 @@ const addProxy = async () => {
 
 			fs.writeFileSync(`${process.env.SQUID_PATH}/passwd`, passwd)
 			fs.writeFileSync(`${process.env.SQUID_PATH}/squid.conf`, squid)
+
+			// squid -k reconfigure
+
+			shell.exec("squid -k reconfigure")
 
 			// console.log(formattedConf)
 			// console.log(formattedPasswd)
