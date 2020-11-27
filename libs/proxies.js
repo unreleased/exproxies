@@ -20,6 +20,11 @@ Proxies.squid = async () => {
 	 * From the database re-create the squid `squiid.conf` format and save it
 	 */
 
+	console.log(__dirname)
+
+	const defaults = fs.readFileSync(`${__dirname}/defaults`, "utf8")
+	console.log(defaults)
+
 	const proxies = await knex("proxies").orderBy("id", "desc")
 	const file = proxies
 		.map(p => {
@@ -32,7 +37,7 @@ Proxies.squid = async () => {
 		})
 		.join("\n")
 
-	fs.writeFileSync(`${process.env.SQUID_PATH}/squid.conf`, file)
+	fs.writeFileSync(`${process.env.SQUID_PATH}/squid.conf`, `${defaults}${file}`)
 	return file
 }
 

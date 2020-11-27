@@ -43,7 +43,7 @@ app.post("/api/proxies", async (req, res) => {
 				})
 				.where("ip", ip)
 		} else {
-			console.log(`[PROXIES] [${ip}] Cannot update proxy as it does not xist.`)
+			console.log(`[PROXIES] [${ip}] Cannot update proxy as it does not exist.`)
 		}
 	}
 

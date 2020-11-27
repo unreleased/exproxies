@@ -61,15 +61,3 @@ via off
 forwarded_for off
 follow_x_forwarded_for deny all
 
-# [27/11/2020 12:54:31] - wwgwm
-acl wwgwm proxy_auth wwgwm
-tcp_outgoing_address 45.95.16.87 wwgwm
-http_access allow wwgwm
-# [27/11/2020 12:54:31] - qvfuy
-acl qvfuy proxy_auth qvfuy
-tcp_outgoing_address 45.95.16.86 qvfuy
-http_access allow qvfuy
-# [27/11/2020 12:54:31] - fezlm
-acl fezlm proxy_auth fezlm
-tcp_outgoing_address 45.95.16.130 fezlm
-http_access allow fezlm
