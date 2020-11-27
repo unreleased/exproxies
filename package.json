@@ -19,6 +19,7 @@
   "homepage": "https://github.com/unreleased/exproxies#readme",
   "dependencies": {
     "apache-md5": "^1.1.5",
+    "body-parser": "^1.19.0",
     "crypto": "^1.0.1",
     "dotenv": "^8.2.0",
     "inquirer": "^7.3.3",

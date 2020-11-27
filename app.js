@@ -30,11 +30,6 @@ inquirer
 	})
 
 const addProxy = async () => {
-	// echo "#$time - $user" >>/etc/$SQUID/squid.conf
-	// echo "acl	$user	proxy_auth	$user" >>/etc/$SQUID/squid.conf
-	// echo  "tcp_outgoing_address $addrs $user" >> /etc/$SQUID/squid.conf
-	// echo  "http_access allow $user" >> /etc/$SQUID/squid.conf
-
 	await inquirer
 		.prompt({
 			type: "input",
@@ -42,40 +37,39 @@ const addProxy = async () => {
 			message: "What is the proxy host?",
 		})
 		.then(({ host }) => {
-			const user = makeid(5)
-			const pass = makeid(5)
-			const proxy = `${host}:3128:${user}:${pass}`
-
-			// Format for squid.conf
-			const formattedConf = [
-				`\n# [${moment().format("DD/MM/YYYY HH:mm:ss")}] - ${user}`,
-				`acl ${user} proxy_auth ${user}`,
-				`tcp_outgoing_address ${host} ${user}`,
-				`http_access allow ${user}`,
-			].join("\n")
-
-			const formattedPasswd = `\n${user}:${md5(pass)}\n`
-
-			// Append the formatted versions to the current files
 			const passwdFile = fs.readFileSync(`${process.env.SQUID_PATH}/passwd`, "utf8")
 			const squidConfFile = fs.readFileSync(`${process.env.SQUID_PATH}/squid.conf`, "utf8")
 
-			const passwd = `${passwdFile}${formattedPasswd}`
-			const squid = `${squidConfFile}${formattedConf}`
+			try {
+				const user = makeid(5)
+				const pass = makeid(5)
+				const proxy = `${host}:3128:${user}:${pass}`
 
-			fs.writeFileSync(`${process.env.SQUID_PATH}/passwd`, passwd)
-			fs.writeFileSync(`${process.env.SQUID_PATH}/squid.conf`, squid)
+				// Format for squid.conf
+				const formattedConf = [
+					`\n# [${moment().format("DD/MM/YYYY HH:mm:ss")}] - ${user}`,
+					`acl ${user} proxy_auth ${user}`,
+					`tcp_outgoing_address ${host} ${user}`,
+					`http_access allow ${user}`,
+				].join("\n")
 
-			// squid -k reconfigure
+				const formattedPasswd = `\n${user}:${md5(pass)}`
+
+				// Append the formatted versions to the current files
+
+				const passwd = `${passwdFile}${formattedPasswd}`
+				const squid = `${squidConfFile}${formattedConf}`
+
+				fs.writeFileSync(`${process.env.SQUID_PATH}/passwd`, passwd)
+				fs.writeFileSync(`${process.env.SQUID_PATH}/squid.conf`, squid)
+
+				console.log(`Proxy ready: ${proxy}`)
+			} catch (err) {
+				fs.writeFileSync(`${process.env.SQUID_PATH}/passwd`, passwdFile)
+				fs.writeFileSync(`${process.env.SQUID_PATH}/squid.conf`, squidConfFile)
+			}
 
 			shell.exec("squid -k reconfigure")
-
-			console.log(`Proxy ready: ${proxy}`)
-
-			// console.log(formattedConf)
-			// console.log(formattedPasswd)
-
-			// Format for passwd
 		})
 }
 
@@ -119,6 +113,8 @@ const deleteProxy = async () => {
 				fs.writeFileSync(`${process.env.SQUID_PATH}/passwd`, passwdFile)
 				fs.writeFileSync(`${process.env.SQUID_PATH}/squid.conf`, squidConfFile)
 			}
+
+			shell.exec("squid -k reconfigure")
 		})
 }
 
