@@ -7,7 +7,29 @@
 
 <table id="proxies" border="1"></table>
 
+<div class="buttons">
+  <button id="prev">Previous page</button>
+  <button id="next">Next page</button>
+</div>
+
 <script>
+  // For pagination, always start at page 0
+  let page = 1
+
+  // Event listeners for pagination
+  document.getElementById("next").addEventListener("click", () => {
+    page++
+    loadProxies()
+  })
+
+  document.getElementById("prev").addEventListener("click", () => {
+    if (page > 1) {
+      page--
+    }
+
+    loadProxies()
+  })
+
   // Search function
   const search = document.getElementById("search")
   search.addEventListener('keyup', () => {
@@ -33,6 +55,9 @@
     if (query) {
       path += `/${query}`
     }
+
+    // Append pagination
+    path += `?page=${page}`
     
     fetch(path).then(res => res.json()).then(proxies => {
       const table = document.getElementById("proxies")
@@ -41,6 +66,7 @@
         <th><input type="checkbox" name="proxy" /></th>
         <th>Proxy</th>
         <th>Last updated</th>
+        <th>Server</th>
         <th>Actions</th>
       </tr>`
 
@@ -50,6 +76,7 @@
             <td><input type="checkbox" name="proxy" /></td>
             <td>${proxy.ip}:${proxy.port}:${proxy.user}:${proxy.pass}</td>
             <td class="${proxy.expired ? 'expired' : ''}">${proxy.updated_at}</td>
+            <td>${proxy.server}</td>
             <td><button class="reset" onclick="reset('${proxy.ip}')">Reset</button></td>
           </tr>`
       }

@@ -23,9 +23,9 @@ app.set("view engine", "handlebars")
 
 const sess = {
 	secret: process.env.ADMIN_PASS,
-	cookie: {},
-	resave: true,
-	saveUninitialized: true,
+	cookie: { secure: false },
+	resave: false,
+	saveUninitialized: false,
 }
 
 if (app.get("env") === "production") {
@@ -55,7 +55,7 @@ app.get("/login", async (req, res) => {
 	return res.render("login")
 })
 
-app.post("/api/login", loggedIn, async (req, res) => {
+app.post("/api/login", async (req, res) => {
 	const password = req.body.password
 
 	if (password === process.env.ADMIN_PASS) {
@@ -71,8 +71,19 @@ app.post("/api/login", loggedIn, async (req, res) => {
 	})
 })
 
-app.get("/api/proxies", loggedIn, async (req, res) => {
-	const proxies = (await knex("proxies")).map(s => {
+app.get("/api/proxies", async (req, res) => {
+	const pagesize = 15
+	const page = req.query.page || 1
+
+	if (page < 1) {
+		return res.status(400).json({
+			message: "Error getting page results.",
+		})
+	}
+
+	const start = (page - 1) * pagesize
+
+	const proxies = (await knex("proxies").limit(pagesize).offset(start)).map(s => {
 		s.expired = moment(s.updated_at).isBefore(moment().subtract("30", "days"))
 		s.updated_at = moment(s.updated_at).format("DD/MM/YYYY HH:mm:ss")
 		return s
