@@ -13,13 +13,21 @@
 </div>
 
 <script>
-  // For pagination, always start at page 0
+  // Search function
   let page = 1
+
+  const search = document.getElementById("search")
+  search.addEventListener('keyup', () => {
+    page = 1
+    loadProxies(search.value)
+  })
+
+  // For pagination, always start at page 0
 
   // Event listeners for pagination
   document.getElementById("next").addEventListener("click", () => {
     page++
-    loadProxies()
+    loadProxies(search.value)
   })
 
   document.getElementById("prev").addEventListener("click", () => {
@@ -27,14 +35,10 @@
       page--
     }
 
-    loadProxies()
-  })
-
-  // Search function
-  const search = document.getElementById("search")
-  search.addEventListener('keyup', () => {
     loadProxies(search.value)
   })
+
+  
 
   // For rendering the proxy data to the frontend
   const reset = (ip) => {

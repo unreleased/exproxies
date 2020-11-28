@@ -5,9 +5,15 @@ const express = require("express")
 const bodyParser = require("body-parser")
 const md5 = require("apache-md5")
 const Helper = require("./libs/helper")
+const fs = require("fs")
 const moment = require("moment")
 const handlebars = require("express-handlebars")
 const session = require("express-session")
+const request = require("request-promise").defaults({
+	simple: false,
+	resolveWithFullResponse: true,
+})
+
 const app = express()
 const port = 3000
 
@@ -74,14 +80,13 @@ app.post("/api/login", async (req, res) => {
 app.get("/api/proxies", async (req, res) => {
 	const pagesize = 15
 	const page = req.query.page || 1
+	const start = (page - 1) * pagesize
 
 	if (page < 1) {
 		return res.status(400).json({
 			message: "Error getting page results.",
 		})
 	}
-
-	const start = (page - 1) * pagesize
 
 	const proxies = (await knex("proxies").limit(pagesize).offset(start)).map(s => {
 		s.expired = moment(s.updated_at).isBefore(moment().subtract("30", "days"))
@@ -92,10 +97,74 @@ app.get("/api/proxies", async (req, res) => {
 	res.json(proxies)
 })
 
+app.get("/api/reconfigure", async (req, res) => {
+	if (req.query.password !== process.env.ADMIN_PASS) {
+		return res.status(401).json({
+			message: "Invalid password specified.",
+		})
+	}
+
+	/**
+	 * This command rewrites and resets squid and can be called from other servers.
+	 * The benefit of this means we don't have to actually SSH into a server which gets messy with STDIN and STDOUT and handling connection errors etc
+	 *
+	 * So if you wanted to reset the proxies on a particular subnet you'd make a HTTP request to EXAMPLE: http://${serverIp}:${httpPort}/api/reconfigure?password=${process.env.ADMIN_PASS}
+	 */
+
+	await Proxies.reconfigure()
+
+	return res.json({
+		message: "Successfully reconfigured the proxies.",
+	})
+})
+
+app.get("/api/reconfigure/all", async (req, res) => {
+	if (req.query.password !== process.env.ADMIN_PASS) {
+		return res.status(401).json({
+			message: "Invalid password specified.",
+		})
+	}
+
+	const servers = JSON.parse(fs.readFileSync("./servers.json", "utf8"))
+	const reset = []
+
+	for (const server of servers) {
+		console.log(server)
+
+		const url = `http://${server.ip}:${server.port}/api/reconfigure?password=${process.env.ADMIN_PASS}`
+
+		await request(url)
+			.then(res => {
+				if (res.statusCode === 200) {
+					reset.push(server.ip)
+					return console.log(`[PROXIES] [${server.ip}] Successfully reset the server proxies.`)
+				} else {
+					return console.log(`[PROXIES] [ERR] [${server.ip}] Something went wrong resetting server`)
+				}
+			})
+			.catch(err => {
+				return console.log(`[PROXIES] [ERR] [${server.ip}] Error resetting server: ${err.message}`)
+			})
+	}
+
+	return res.json({
+		message: `Successfully reset servers: ${reset.join(`\n`)}`,
+	})
+})
+
 app.get("/api/proxies/:query", loggedIn, async (req, res) => {
 	const query = req.params.query
+	const pagesize = 15
+	const page = req.query.page || 1
+	const start = (page - 1) * pagesize
 
-	let proxies = await knex("proxies").where("user", "LIKE", `%${query}%`).orWhere("pass", "LIKE", `%${query}%`).orWhere("ip", "LIKE", `%${query}%`)
+	if (page < 1) {
+		return res.status(400).json({
+			message: "Error getting page results.",
+		})
+	}
+
+	let proxies = await knex("proxies").where("user", "LIKE", `%${query}%`).orWhere("pass", "LIKE", `%${query}%`).orWhere("ip", "LIKE", `%${query}%`).limit(pagesize).offset(start)
 
 	proxies = proxies.map(s => {
 		s.expired = moment(s.updated_at).isBefore(moment().subtract("30", "days"))

@@ -29,6 +29,9 @@
     "moment": "^2.29.1",
     "mysql": "^2.18.1",
     "pass": "^0.2.0",
-    "shelljs": "^0.8.4"
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6",
+    "shelljs": "^0.8.4",
+    "ssh2": "^0.8.9"
   }
 }
