@@ -18,6 +18,14 @@ const Proxies = {}
  * via executing the shell
  */
 
+Proxies.export = async () => {
+	const proxies = await knex("proxies")
+	const formatted = proxies.map(p => `${p.ip}:${p.port}:${p.user}:${p.pass}`).join("\r\n")
+	console.log(formatted)
+
+	return formatted
+}
+
 Proxies.squid = async () => {
 	/**
 	 * From the database re-create the squid `squiid.conf` format and save it

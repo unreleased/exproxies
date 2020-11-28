@@ -77,6 +77,11 @@ app.post("/api/login", async (req, res) => {
 	})
 })
 
+app.get("/api/proxies/export", async (req, res) => {
+	const proxies = await Proxies.export()
+	res.send(proxies)
+})
+
 app.get("/api/proxies", async (req, res) => {
 	const pagesize = 15
 	const page = req.query.page || 1
