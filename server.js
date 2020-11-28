@@ -55,7 +55,7 @@ app.get("/login", async (req, res) => {
 	return res.render("login")
 })
 
-app.post("/api/login", async (req, res) => {
+app.post("/api/login", loggedIn, async (req, res) => {
 	const password = req.body.password
 
 	if (password === process.env.ADMIN_PASS) {
@@ -71,7 +71,7 @@ app.post("/api/login", async (req, res) => {
 	})
 })
 
-app.get("/api/proxies", async (req, res) => {
+app.get("/api/proxies", loggedIn, async (req, res) => {
 	const proxies = (await knex("proxies")).map(s => {
 		s.expired = moment(s.updated_at).isBefore(moment().subtract("30", "days"))
 		s.updated_at = moment(s.updated_at).format("DD/MM/YYYY HH:mm:ss")
@@ -81,7 +81,7 @@ app.get("/api/proxies", async (req, res) => {
 	res.json(proxies)
 })
 
-app.get("/api/proxies/:query", async (req, res) => {
+app.get("/api/proxies/:query", loggedIn, async (req, res) => {
 	const query = req.params.query
 
 	let proxies = await knex("proxies").where("user", "LIKE", `%${query}%`).orWhere("pass", "LIKE", `%${query}%`).orWhere("ip", "LIKE", `%${query}%`)
@@ -95,7 +95,7 @@ app.get("/api/proxies/:query", async (req, res) => {
 	res.json(proxies)
 })
 
-app.post("/api/proxies", async (req, res) => {
+app.post("/api/proxies", loggedIn, async (req, res) => {
 	/**
 	 * Change the passwords for proxies inside the request.
 	 */
