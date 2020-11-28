@@ -2,6 +2,11 @@ const fs = require("fs")
 const knex = require("./database")
 const moment = require("moment")
 const Shell = require("shelljs")
+const request = require("request-promise").defaults({
+	resolveWithFullResponse: true,
+	simple: false,
+})
+
 const Proxies = {}
 
 /**
@@ -67,6 +72,28 @@ Proxies.reconfigure = async () => {
 		console.log(`[PROXIES] [RECONFIGURE] [ERR] ${err.message}`)
 		return false
 	}
+}
+
+Proxies.sendReconfigure = async ip => {
+	const servers = JSON.parse(fs.readFileSync("./servers.json", "utf8"))
+	const server = servers[ip]
+
+	const url = `http://${server.ip}:${server.port}/api/reconfigure?password=${process.env.ADMIN_PASS}`
+
+	request(url)
+		.then(res => {
+			if (res.statusCode === 200) {
+				console.log(`[PROXIES] [${res.statusCode}] [${server.ip}] Successfully reset the server proxies.`)
+				return true
+			} else {
+				console.log(`[PROXIES] [${res.statusCode}] [${server.ip}] Something went wrong resetting server`)
+				return false
+			}
+		})
+		.catch(err => {
+			console.log(`[PROXIES] [ERR] [${server.ip}] Error resetting server: ${err.message}`)
+			return false
+		})
 }
 
 module.exports = Proxies

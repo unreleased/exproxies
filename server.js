@@ -118,7 +118,9 @@ app.get("/api/reconfigure", async (req, res) => {
 	})
 })
 
-app.get("/api/reconfigure/all", async (req, res) => {
+app.get("/api/reconfigure/:ip", async (req, res) => {
+	const ip = req.params.ip
+
 	if (req.query.password !== process.env.ADMIN_PASS) {
 		return res.status(401).json({
 			message: "Invalid password specified.",
@@ -126,29 +128,30 @@ app.get("/api/reconfigure/all", async (req, res) => {
 	}
 
 	const servers = JSON.parse(fs.readFileSync("./servers.json", "utf8"))
-	const reset = []
+	const server = servers[req.params.ip]
 
-	for (const server of servers) {
-		console.log(server)
-
-		const url = `http://${server.ip}:${server.port}/api/reconfigure?password=${process.env.ADMIN_PASS}`
-
-		await request(url)
-			.then(res => {
-				if (res.statusCode === 200) {
-					reset.push(server.ip)
-					return console.log(`[PROXIES] [${res.statusCode}] [${server.ip}] Successfully reset the server proxies.`)
-				} else {
-					return console.log(`[PROXIES] [${res.statusCode}] [${server.ip}] Something went wrong resetting server`)
-				}
-			})
-			.catch(err => {
-				return console.log(`[PROXIES] [ERR] [${server.ip}] Error resetting server: ${err.message}`)
-			})
+	if (!server) {
+		return res.status(400).json({
+			message: "Invalid server specified",
+		})
 	}
 
+	const url = `http://${server.ip}:${server.port}/api/reconfigure?password=${process.env.ADMIN_PASS}`
+
+	await request(url)
+		.then(res => {
+			if (res.statusCode === 200) {
+				return console.log(`[PROXIES] [${res.statusCode}] [${server.ip}] Successfully reset the server proxies.`)
+			} else {
+				return console.log(`[PROXIES] [${res.statusCode}] [${server.ip}] Something went wrong resetting server`)
+			}
+		})
+		.catch(err => {
+			return console.log(`[PROXIES] [ERR] [${server.ip}] Error resetting server: ${err.message}`)
+		})
+
 	return res.json({
-		message: `Successfully reset servers: ${reset.join(`\n`)}`,
+		message: `Successfully reset server: ${ip}`,
 	})
 })
 
@@ -180,8 +183,14 @@ app.post("/api/proxies", loggedIn, async (req, res) => {
 	 * Change the passwords for proxies inside the request.
 	 */
 
+	const servers = []
+
 	for (const ip of req.body) {
 		const proxy = await knex("proxies").where("ip", ip).first()
+
+		if (!servers.includes(proxy.server)) {
+			servers.push(proxy.server)
+		}
 
 		if (proxy) {
 			const pass = Helper.rs(5)
@@ -197,7 +206,9 @@ app.post("/api/proxies", loggedIn, async (req, res) => {
 		}
 	}
 
-	await Proxies.reconfigure()
+	for (const server of servers) {
+		await Proxies.sendReconfigure(server)
+	}
 
 	res.json({
 		message: "Successfully updated proxies.",
