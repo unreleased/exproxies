@@ -22,7 +22,7 @@ app.engine(
 app.set("view engine", "handlebars")
 
 const sess = {
-	secret: "keyboard cat",
+	secret: process.env.ADMIN_PASS,
 	cookie: {},
 	resave: true,
 	saveUninitialized: true,
