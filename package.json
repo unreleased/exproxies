@@ -23,6 +23,7 @@
     "crypto": "^1.0.1",
     "dotenv": "^8.2.0",
     "express-handlebars": "^5.2.0",
+    "express-session": "^1.17.1",
     "inquirer": "^7.3.3",
     "knex": "^0.21.12",
     "moment": "^2.29.1",

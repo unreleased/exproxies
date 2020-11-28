@@ -7,6 +7,7 @@ const md5 = require("apache-md5")
 const Helper = require("./libs/helper")
 const moment = require("moment")
 const handlebars = require("express-handlebars")
+const session = require("express-session")
 const app = express()
 const port = 3000
 
@@ -18,13 +19,57 @@ app.engine(
 	})
 )
 
-app.get("/", async (req, res) => {
-	return res.render("index", {
-		layout: false,
-	})
+app.set("view engine", "handlebars")
+
+const sess = {
+	secret: "keyboard cat",
+	cookie: {},
+	resave: true,
+	saveUninitialized: true,
+}
+
+if (app.get("env") === "production") {
+	app.set("trust proxy", 1) // trust first proxy
+	sess.cookie.secure = true // serve secure cookies
+}
+
+app.use(session(sess))
+
+const loggedIn = (req, res, next) => {
+	if (req.session.user) {
+		return next()
+	}
+
+	return res.redirect("/login")
+}
+
+app.get("/", loggedIn, async (req, res) => {
+	return res.render("index")
 })
 
-app.set("view engine", "handlebars")
+app.get("/login", async (req, res) => {
+	if (req.session.user) {
+		return res.redirect("/")
+	}
+
+	return res.render("login")
+})
+
+app.post("/api/login", async (req, res) => {
+	const password = req.body.password
+
+	if (password === process.env.ADMIN_PASS) {
+		req.session.user = true
+
+		return res.json({
+			message: "Successfully logged in.",
+		})
+	}
+
+	return res.status(401).json({
+		message: "Invalid password.",
+	})
+})
 
 app.get("/api/proxies", async (req, res) => {
 	const proxies = (await knex("proxies")).map(s => {

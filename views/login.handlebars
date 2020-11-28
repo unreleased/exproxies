@@ -1,0 +1,39 @@
+<h1>Control Panel</h1>
+
+<form id="loginForm">
+  <input type="password" id="password" placeholder="Enter the admin password." />
+  <button type="submit">Login</button>
+  <p id="error"></p>
+</form>
+
+<script>
+  window.onload = () => {
+    const loginForm = document.getElementById("loginForm")
+    const error = document.getElementById("error")
+
+    loginForm.addEventListener('submit', (e) => {
+      const password = document.getElementById("password").value
+      e.preventDefault()
+      
+      fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          password: password
+        })
+      }).then(async res => {
+        if (res.status === 401) {
+          // Show error
+          const data = await res.json()
+          error.innerText = data.message
+        } else {
+          window.location.href = '/'
+        }
+      })
+
+      return false
+    })
+  }
+</script>
