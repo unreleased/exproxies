@@ -10,7 +10,8 @@ To deploy, clone Exproxies into any directory on your squid servers. It's critic
 
 We're currently using this on 4 different proxy servers. Create a file called `servers.json` with the IPs & ports that you will send a HTTP request to when we want to reconfigure the proxies. We did this because it was easier to setup slave HTTP servers running the same app than it was to write a script to SSH into the server and run `squid -k reconfigure` to reconfigure the proxies (Lack of experience and seems difficult to error handle because i'd be reading from STDOUT)
 
-```{
+```json
+{
 	"45.XX.XX.130": {
 		"ip": "45.XX.XX.130",
 		"port": "3000"
