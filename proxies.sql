@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS `proxies` (
   `user` varchar(32) COLLATE utf8mb4_bin NOT NULL,
   `pass` varchar(32) COLLATE utf8mb4_bin NOT NULL,
   `pass_md5` varchar(128) COLLATE utf8mb4_bin NOT NULL,
+  `server` varchar(64) COLLATE utf8mb4_bin NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
