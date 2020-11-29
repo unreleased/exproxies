@@ -80,6 +80,10 @@ app.post("/api/login", async (req, res) => {
 	})
 })
 
+app.get("/renew", loggedIn, async (req, res) => {
+	return res.render("renew")
+})
+
 app.get("/api/proxies/export", loggedIn, async (req, res) => {
 	const proxies = await Proxies.export()
 	res.send(proxies)
@@ -179,8 +183,13 @@ app.post("/api/proxies", loggedIn, async (req, res) => {
 	 */
 
 	const servers = []
+	const proxies = []
 
-	for (const ip of req.body) {
+	for (let ip of req.body) {
+		if (ip.includes(":")) {
+			ip = ip.split(":")[0]
+		}
+
 		const proxy = await knex("proxies").where("ip", ip).first()
 
 		if (!servers.includes(proxy.server)) {
@@ -188,10 +197,14 @@ app.post("/api/proxies", loggedIn, async (req, res) => {
 		}
 
 		if (proxy) {
+			const user = Helper.rs(5)
 			const pass = Helper.rs(5)
+
+			proxies.push(`${ip}:3128:${user}:${pass}`)
+
 			await knex("proxies")
 				.update({
-					user: Helper.rs(5),
+					user: user,
 					pass: pass,
 					pass_md5: md5(pass),
 				})
@@ -207,6 +220,7 @@ app.post("/api/proxies", loggedIn, async (req, res) => {
 
 	res.json({
 		message: "Successfully updated proxies.",
+		proxies: proxies,
 	})
 })
 
