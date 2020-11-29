@@ -45,6 +45,10 @@ const loggedIn = (req, res, next) => {
 		return next()
 	}
 
+	if (req.query.password === process.env.ADMIN_PASS) {
+		return next()
+	}
+
 	return res.redirect("/login")
 }
 
@@ -76,12 +80,12 @@ app.post("/api/login", async (req, res) => {
 	})
 })
 
-app.get("/api/proxies/export", async (req, res) => {
+app.get("/api/proxies/export", loggedIn, async (req, res) => {
 	const proxies = await Proxies.export()
 	res.send(proxies)
 })
 
-app.get("/api/proxies", async (req, res) => {
+app.get("/api/proxies", loggedIn, async (req, res) => {
 	const pagesize = 15
 	const page = req.query.page || 1
 	const start = (page - 1) * pagesize
@@ -101,13 +105,7 @@ app.get("/api/proxies", async (req, res) => {
 	res.json(proxies)
 })
 
-app.get("/api/reconfigure", async (req, res) => {
-	if (req.query.password !== process.env.ADMIN_PASS) {
-		return res.status(401).json({
-			message: "Invalid password specified.",
-		})
-	}
-
+app.get("/api/reconfigure", loggedIn, async (req, res) => {
 	/**
 	 * This command rewrites and resets squid and can be called from other servers.
 	 * The benefit of this means we don't have to actually SSH into a server which gets messy with STDIN and STDOUT and handling connection errors etc
@@ -122,15 +120,8 @@ app.get("/api/reconfigure", async (req, res) => {
 	})
 })
 
-app.get("/api/reconfigure/:ip", async (req, res) => {
+app.get("/api/reconfigure/:ip", loggedIn, async (req, res) => {
 	const ip = req.params.ip
-
-	if (req.query.password !== process.env.ADMIN_PASS) {
-		return res.status(401).json({
-			message: "Invalid password specified.",
-		})
-	}
-
 	const servers = JSON.parse(fs.readFileSync("./servers.json", "utf8"))
 	const server = servers[req.params.ip]
 
