@@ -145,7 +145,6 @@ app.get("/api/reconfigure/:ip", async (req, res) => {
 	await request(url)
 		.then(res => {
 			if (res.statusCode === 200) {
-				console.log(res.body)
 				return console.log(`[PROXIES] [${res.statusCode}] [${server.ip}] Successfully reset the server proxies.`)
 			} else {
 				return console.log(`[PROXIES] [${res.statusCode}] [${server.ip}] Something went wrong resetting server`)
