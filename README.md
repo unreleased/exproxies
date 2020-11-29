@@ -27,7 +27,7 @@ We're currently using this on 4 different proxy servers. Create a file called `s
 
 ### Database
 
-At the moment all Exproxies is setup for using is a remote MySQL database. You can import `[proxies.sql](https://github.com/unreleased/exproxies/blob/main/proxies.sql)` as the format. Currently we store the proxy passwords and both plaintext and apache-md5 in the database. Honestly, I don't really know much about Squid and I created this dashboard by translating a CLI bash script and adding some additional features.
+At the moment all Exproxies is setup for using is a remote MySQL database. You can import [proxies.sql](https://github.com/unreleased/exproxies/blob/main/proxies.sql) as the format. Currently we store the proxy passwords and both plaintext and apache-md5 in the database. Honestly, I don't really know much about Squid and I created this dashboard by translating a CLI bash script and adding some additional features.
 
 ### Node, NPM & GIT
 
