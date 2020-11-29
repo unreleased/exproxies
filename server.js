@@ -15,7 +15,6 @@ const request = require("request-promise").defaults({
 })
 
 const app = express()
-const port = 3000
 
 app.use(bodyParser.json())
 app.engine(
@@ -221,6 +220,6 @@ app.post("/api/proxies", loggedIn, async (req, res) => {
 	})
 })
 
-app.listen(port, () => {
-	console.log(`[PROXIES] Server started on: http://localhost:${port}`)
+app.listen(process.env.PORT, () => {
+	console.log(`[PROXIES] Server started on: http://localhost:${process.env.PORT}`)
 })

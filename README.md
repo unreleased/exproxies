@@ -1,31 +1,45 @@
-# Exproxies
+# Exproxies Proxy Manager
 
-A basic NodeJS squid server proxy manager for CentOS 7
+Exproxies are [Express Notify's](https://notify.express/) inhouse proxies. We use CentOS 7 running squid to host our proxy servers. To manage our proxy authentication (user/password) we use this. It's still very basic at the moment and more features will be added and adjusted as time goes on. Unfortunately, right now this isn't a huge priority and all that is required is a very basic system. Feel free to contribute if you feel you can bring anything additional that might benefit myself or others.
 
-### Details
+### Deployment
 
-A basic management script for managing proxies on a Squid server running CentOS7.
+To deploy, clone Exproxies into any directory on your squid servers. It's critical that when you deploy this you correctly configure your `.env` file. Ensure that `env=PRODUCTION` otherwise the server will not execute the reconfiguration. I recommend using [pm2](https://www.npmjs.com/package/pm2) to run the Node server 24/7. You can visit `http://your_server_ip:port/` to access the control panel. The default password is `password` and you should definitely change that.
 
-All hooked up to a mysql database for easy management for staff.
+### Multiple proxy servers
 
-Make sure you change your `ENV=development` variable inside `.env` to `ENV=production` on your Squid server. If you do not do this shelljs will not execute and the proxies will not be reconfigured.
+We're currently using this on 4 different proxy servers. Create a file called `servers.json` with the IPs & ports that you will send a HTTP request to when we want to reconfigure the proxies. We did this because it was easier to setup slave HTTP servers running the same app than it was to write a script to SSH into the server and run `squid -k reconfigure` to reconfigure the proxies (Lack of experience and seems difficult to error handle because i'd be reading from STDOUT)
 
-You can run this from anywhere but I would recommend you clone this into a repo on your server in a memorable location (i.e `~`) and use [pm2](https://www.npmjs.com/package/pm2)
+```{
+	"45.XX.XX.130": {
+		"ip": "45.XX.XX.130",
+		"port": "3000"
+	},
+	"46.XX.XX.140": {
+		"ip": "46.XX.XX.140",
+		"port": "3000"
+	}
+}
+```
+
+### Database
+
+At the moment all Exproxies is setup for using is a remote MySQL database. You can import `[proxies.sql](https://github.com/unreleased/exproxies/blob/main/proxies.sql)` as the format. Currently we store the proxy passwords and both plaintext and apache-md5 in the database. Honestly, I don't really know much about Squid and I created this dashboard by translating a CLI bash script and adding some additional features.
 
 ### Node, NPM & GIT
 
 If your servers do not already have NodeJS and Git installed please follow below:
 
-### NodeJS & NPM
+### Installing NodeJS & NPM
 
 Note - I am doing this on CentOS 7, you may need to find your own instructions if you are not using similar. You can change the version of Node you want to use below, I am using v12 currently.
 
-curl -sL https://rpm.nodesource.com/setup_12.x | sudo bash -
+`curl -sL https://rpm.nodesource.com/setup_12.x | sudo bash -`
 
-sudo yum install -y nodejs
+`sudo yum install -y nodejs`
 
-### GIT
+### Installing GIT
 
-sudo yum install -y git
+`sudo yum install -y git`
 
 Easy right.
