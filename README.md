@@ -6,6 +6,8 @@ Exproxies are [Express Notify's](https://notify.express/) inhouse proxies. We us
 
 To deploy, clone Exproxies into any directory on your squid servers. It's critical that when you deploy this you correctly configure your `.env` file. Ensure that `env=PRODUCTION` otherwise the server will not execute the reconfiguration. I recommend using [pm2](https://www.npmjs.com/package/pm2) to run the Node server 24/7. You can visit `http://your_server_ip:port/` to access the control panel. The default password is `password` and you should definitely change that.
 
+For you beginners (And I know there's a lot of you). You **need** to rename `servers.example.json` to `servers.json` and make sure the main server ip (for the proxy server, not the subnet IPs). You also need to rename `.env.template` to `.env`
+
 ### Multiple proxy servers
 
 We're currently using this on 4 different proxy servers. Create a file called `servers.json` with the IPs & ports that you will send a HTTP request to when we want to reconfigure the proxies. We did this because it was easier to setup slave HTTP servers running the same app than it was to write a script to SSH into the server and run `squid -k reconfigure` to reconfigure the proxies (Lack of experience and seems difficult to error handle because i'd be reading from STDOUT)
