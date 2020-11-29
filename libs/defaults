@@ -13,8 +13,15 @@ auth_param basic children 500
 auth_param basic credentialsttl 20 seconds
 #acl users src "/etc/squid/squid_users"
 
+
+# You'll want to change your default IP auths to something else!
+
 acl bando src 86.0.165.91
 http_access allow bando
+acl express src 35.246.74.132
+http_access allow express
+acl server src 35.230.132.110
+http_access allow server
 
 
 acl ncsa_users proxy_auth REQUIRED
