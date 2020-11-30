@@ -1,0 +1,25 @@
+<h1>Export</h1>
+<p>There is a little bit of lag when exporting all of our proxies.</p>
+
+<div class="buttons">
+  <button type="button" id="all" onclick="getProxies('all')">All</button>
+  <button type="button" id="active" onclick="getProxies('active')">Active</button>
+  <button type="button" id="expired" onclick="getProxies('expired')">Expired</button>
+</div>
+
+<form id="renewProxies">
+  <textarea placeholder="Click the button to get the proxies" id="proxies"></textarea>
+</form>
+
+<script>
+  const getProxies = (type) => {
+    fetch(`/api/proxies/export/${type}`).then(async res => {
+      const data = await res.json()
+      if (res.status === 200) {
+        const proxies = data.map(d => `${d.ip}:${d.port}:${d.user}:${d.pass}`)
+        const textbox = document.getElementById("proxies")
+        textbox.innerHTML = proxies.join('\n')
+      }
+    })
+  }
+</script>

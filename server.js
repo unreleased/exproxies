@@ -49,6 +49,10 @@ const loggedIn = (req, res, next) => {
 		return next()
 	}
 
+	if (process.env.ENV === "development") {
+		return next()
+	}
+
 	return res.redirect("/login")
 }
 
@@ -80,12 +84,33 @@ app.post("/api/login", async (req, res) => {
 	})
 })
 
+app.get("/export", async (req, res) => {
+	return res.render("export")
+})
+
 app.get("/renew", loggedIn, async (req, res) => {
 	return res.render("renew")
 })
 
 app.get("/api/proxies/export", loggedIn, async (req, res) => {
 	const proxies = await Proxies.export()
+	res.send(proxies)
+})
+
+app.get("/api/proxies/export/:method", loggedIn, async (req, res) => {
+	const method = req.params.method
+	const date = moment().subtract("1", "month").format("YYYY-MM-DD HH:mm:ss")
+	let proxies = []
+
+	if (method === "all") {
+		proxies = await knex("proxies").orderBy("id", "DESC")
+	} else if (method === "active") {
+		proxies = await knex("proxies").orderBy("id", "DESC").where("updated_at", ">", date)
+	} else if (method === "expired") {
+		proxies = await knex("proxies").orderBy("id", "DESC").where("updated_at", "<", date).orWhere("updated_at", null)
+	}
+
+	// const proxies = await Proxies.export()
 	res.send(proxies)
 })
 
