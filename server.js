@@ -84,7 +84,7 @@ app.post("/api/login", async (req, res) => {
 	})
 })
 
-app.get("/export", async (req, res) => {
+app.get("/export", loggedIn, async (req, res) => {
 	return res.render("export")
 })
 
