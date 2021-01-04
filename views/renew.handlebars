@@ -3,18 +3,27 @@
 
 <form id="renewProxies">
   <textarea placeholder="Paste proxies here&#10;&#10;ip:port:user:pass&#10;ip:port:user:pass" id="proxies"></textarea>
-  <button class="btn" type="submit">Renew</button>
+  <input class="btn" type="submit" name="action" value="Renew" />
+  <input class="btn" type="submit" name="action" value="Renew (Same password)">
 </form>
 
 <script>
   window.onload = () => {
     const renewForm = document.getElementById("renewProxies")
     renewForm.addEventListener('submit', (e) => {
+      const changePasswords = (e.submitter.value === "Renew")
+      console.log(changePasswords)
+
       const proxies = document.getElementById("proxies")
       const proxiesText = proxies.value
       const proxiesJson = proxiesText.split('\n').map(p => p.trim())
 
-      fetch('/api/proxies', {
+      let path = '/api/proxies'
+      if (!changePasswords) {
+        path += `?same=true`
+      }
+
+      fetch(path, {
         method: 'POST',
         headers: {
           'content-type': 'application/json'

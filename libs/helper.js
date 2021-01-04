@@ -10,4 +10,8 @@ Helper.rs = length => {
 	return result
 }
 
+Helper.formatTime = time => {
+	return time.utc().format("YYYY-MM-DD HH:mm:ss")
+}
+
 module.exports = Helper

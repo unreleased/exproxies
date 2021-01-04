@@ -222,8 +222,13 @@ app.post("/api/proxies", loggedIn, async (req, res) => {
 		}
 
 		if (proxy) {
-			const user = Helper.rs(5)
-			const pass = Helper.rs(5)
+			let user = proxy.user
+			let pass = proxy.pass
+
+			if (!req.query.same) {
+				user = Helper.rs(5)
+				pass = Helper.rs(5)
+			}
 
 			proxies.push(`${ip}:3128:${user}:${pass}`)
 
@@ -252,3 +257,39 @@ app.post("/api/proxies", loggedIn, async (req, res) => {
 app.listen(process.env.PORT, () => {
 	console.log(`[PROXIES] Server started on: http://localhost:${process.env.PORT}`)
 })
+
+async function resetRenewals() {
+	/**
+	 * Check proxies every 12 hours for renewals and reset them.
+	 */
+
+	const servers = []
+
+	const before = Helper.formatTime(moment().subtract("1", "month"))
+	const proxies = await knex("proxies").where("updated_at", "<", before)
+
+	for (const proxy of proxies) {
+		if (!servers.includes(proxy.server)) {
+			servers.push(proxy.server)
+		}
+
+		const user = Helper.rs(5)
+		const pass = Helper.rs(5)
+
+		await knex("proxies")
+			.update({
+				user: user,
+				pass: pass,
+				pass_md5: md5(pass),
+			})
+			.where("ip", proxy.ip)
+	}
+
+	for (const server of servers) {
+		await Proxies.sendReconfigure(server)
+	}
+}
+
+setInterval(function () {
+	resetRenewals()
+}, 12 * 60 * 60 * 1000)
