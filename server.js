@@ -281,6 +281,7 @@ async function resetRenewals() {
 				user: user,
 				pass: pass,
 				pass_md5: md5(pass),
+				updated_at: null,
 			})
 			.where("ip", proxy.ip)
 	}
@@ -290,6 +291,26 @@ async function resetRenewals() {
 	}
 }
 
-setInterval(function () {
-	resetRenewals()
-}, 12 * 60 * 60 * 1000)
+if (process.env.MASTER == "TRUE") {
+	setInterval(function () {
+		resetRenewals()
+	}, 12 * 60 * 60 * 1000)
+}
+
+// ;(async () => {
+//  // FOR ADDING PROXIES
+// 	for (let i = 4; i < 255; i++) {
+// 		const user = Helper.rs(5)
+// 		const pass = Helper.rs(5)
+// 		const ip = `213.108.247.${i}`
+
+// 		await knex("proxies").insert({
+// 			ip: ip,
+// 			port: "3128",
+// 			user: user,
+// 			pass: pass,
+// 			pass_md5: md5(pass),
+// 			server: "213.108.247.2",
+// 		})
+// 	}
+// })()
