@@ -92,6 +92,10 @@ app.get("/renew", loggedIn, async (req, res) => {
 	return res.render("renew")
 })
 
+app.get("/expire", loggedIn, async (req, res) => {
+	return res.render("expire")
+})
+
 app.get("/api/proxies/export", loggedIn, async (req, res) => {
 	const proxies = await Proxies.export()
 	res.send(proxies)
@@ -105,9 +109,9 @@ app.get("/api/proxies/export/:method", loggedIn, async (req, res) => {
 	if (method === "all") {
 		proxies = await knex("proxies").orderBy("id", "DESC")
 	} else if (method === "active") {
-		proxies = await knex("proxies").orderBy("id", "DESC").where("updated_at", ">", date)
+		proxies = await knex("proxies").orderBy("id", "DESC").whereNot("updated_at", null)
 	} else if (method === "expired") {
-		proxies = await knex("proxies").orderBy("id", "DESC").where("updated_at", "<", date).orWhere("updated_at", null)
+		proxies = await knex("proxies").orderBy("id", "DESC").where("updated_at", null)
 	}
 
 	// const proxies = await Proxies.export()
@@ -254,6 +258,33 @@ app.post("/api/proxies", loggedIn, async (req, res) => {
 	})
 })
 
+app.post("/api/proxies/expire", loggedIn, async (req, res) => {
+	const expiration = req.body.expiration
+	const proxies = req.body.proxies
+
+	if (!expiration) {
+		return res.status(400).json({
+			message: "Missing `expiration`.",
+		})
+	}
+
+	const expirationFormatted = Helper.formatTime(moment(expiration).add("12", "hours"))
+
+	// Get all proxy ips and update the expiration on the dashboard
+	for (const p of proxies) {
+		const ip = p.split(":")[0]
+
+		await knex("proxies")
+			.update({
+				updated_at: expirationFormatted,
+			})
+			.where("ip", ip)
+		console.log(ip)
+	}
+
+	return res.json({})
+})
+
 app.listen(process.env.PORT, () => {
 	console.log(`[PROXIES] Server started on: http://localhost:${process.env.PORT}`)
 })
@@ -298,7 +329,7 @@ if (process.env.MASTER == "TRUE") {
 }
 
 // ;(async () => {
-//  // FOR ADDING PROXIES
+// 	// FOR ADDING PROXIES
 // 	for (let i = 4; i < 255; i++) {
 // 		const user = Helper.rs(5)
 // 		const pass = Helper.rs(5)
@@ -314,3 +345,7 @@ if (process.env.MASTER == "TRUE") {
 // 		})
 // 	}
 // })()
+
+/**
+ * For
+ */

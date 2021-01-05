@@ -1,0 +1,47 @@
+<h1>Expire</h1>
+<p>Paste in proxies and set the date you want them to expire.</p>
+
+<form id="renewProxies">
+  <textarea placeholder="Paste proxies here&#10;&#10;ip:port:user:pass&#10;ip:port:user:pass" id="proxies"></textarea>
+  <input type="date" name="expire_date" id="expiration" />
+  <input class="btn" type="submit" name="action" value="Set Expiration" />
+</form>
+
+<script>
+  window.onload = () => {
+    const renewForm = document.getElementById("renewProxies")
+    renewForm.addEventListener('submit', (e) => {
+      const proxies = document.getElementById("proxies")
+      const proxiesText = proxies.value
+      const proxiesJson = proxiesText.split('\n').map(p => p.trim())
+      const expiration = document.getElementById("expiration").value
+
+
+      fetch('api/proxies/expire', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          proxies: proxiesJson,
+          expiration: expiration
+        })
+      }).then(async res => {
+        if (res.status === 200) {
+          const data = await res.json()
+
+          proxies.value = data.proxies.join('\n')
+
+          console.log(data)
+          console.log(`[${res.status}] Successfully changed proxy expiration`)
+        } else {
+          console.log(`[${res.status}] Error changing proxy expirations`)
+        }
+      }).catch(err => {
+        console.log(`[ERR] Error changing proxy expirations: ${err.message}`)
+      })
+
+      e.preventDefault()
+    })
+  }
+</script>
