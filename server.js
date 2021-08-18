@@ -45,11 +45,7 @@ const loggedIn = (req, res, next) => {
     return next()
   }
 
-  console.log(
-    `Password "${req.query.password}", admin: "${process.env.ADMIN_PASS}"`
-  )
   if (req.query.password == process.env.ADMIN_PASS) {
-    console.log(`User authed successfully.`)
     return next()
   }
 
